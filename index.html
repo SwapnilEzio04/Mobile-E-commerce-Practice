@@ -1,151 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile Section</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mobile Section</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
 
-<body>
-    <h1 class="sm:text-3xl font-bold text-shadow-indigo-300 text-center py-2
-                   md:text-3xl font-bold text-shadow-indigo-300 text-center py-2
-                   lg:text-3xl font-bold text-shadow-indigo-300 text-center py-5">Mobile Lists</h1>
-    <div class="main  flex justify-center">
-        <div id="filterSection" class="sm:flex flex-col w-[25%] px-10 py-10 
-                                  md:flex flex-col w-[30%] px-10 py-10 
-                                  lg:flex flex-col w-[30%] px-10 py-10
-            bg-gray-300">
+    <body class="bg-gray-100">
+        <h1
+            class="text-3xl sm:text-4xl md:text-5xl font-bold text-center text-black py-6">
+            Mobile Lists
+        </h1>
+
+        <div
+            class="main flex flex-col md:flex-row w-full max-w-7xl mx-auto bg-white shadow-lg rounded-2xl overflow-hidden">
+            <!-- Filter Section -->
+            <div id="filterSection"
+                class="w-full md:w-[30%] bg-gray-300 px-6 py-8 space-y-5 border-b md:border-b-0 md:border-r border-gray-300">
+            </div>
+
+            <!-- Product Section -->
+            <div id="productSection"
+                class="w-full md:w-[70%] bg-blue-200 px-6 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
-        <div id="productSection" class="flex flex-col w-[75%] px-20 py-10 bg-blue-200">
 
-        </div>
-    </div>
-    <script>
-        let filterSection = document.getElementById("filterSection");
-        let productSection = document.getElementById("productSection");
-        let allMobiles = [];
-
-        async function getMobiles() {
-            const res = await fetch("https://68fb22ac94ec96066024bd40.mockapi.io/mobiles/products");
-            const data = await res.json();
-            allMobiles = data;
-            let allBrands = data.map(brandName => brandName.brand);
-            let uniqueBrands = [...new Set(allBrands)];
-            const maxPrice = Math.max(...data.map(m => m.price));
-            filterSection.innerHTML = `
-            <h2 class="sm:text-4xl font-bold
-                       md:text-4xl font-bold
-                       lg:text-4xl font-bold">Brands</h2>
-            <div class="flex flex-col py-3 px-5 space-y-2">
-                <label class="px-5 sm:text-lg font-medium md:text-lg font-medium lg:text-lg font-medium">
-                <input type="checkbox" id="selectAll" class="sm:scale-125 px-1 md:scale-125 px-1 lg:scale-125 px-1"> Select All
-                </label>
-                <label class="px-5 sm:text-lg font-medium md:text-lg font-medium lg:text-lg font-medium">
-                    <input type="checkbox" id="clearAll" class="sm:scale-125 px-1 md:scale-125 px-1 lg:scale-125 px-1"> Clear All
-                </label>
-                <div class="flex flex-col py-3 px-5">
-                    ${uniqueBrands.map(brand => `
-                    <label for="" class="sm:text-lg font-medium md:text-lg font-medium lg:text-lg font-medium"><input
-                        type="checkbox" value=${brand} class="brandCheckbox sm:scale-125 px-1 md:scale-125 px-1 lg:scale-125 px-1"> ${brand}</label>
-                    `).join('')}   
-                </div>
-            </div>
-            <h2 class="sm:text-4xl font-bold
-                       md:text-4xl font-bold
-                       lg:text-4xl font-bold">Price Range</h2>
-            <div class="flex flex-col py-3 px-5 space-y-3">
-            <input type="range" id="priceRange" min="0" max="${maxPrice}" step="1000" value="${maxPrice}" class="w-full accent-gray-700 cursor-pointer">
-            <div class="flex justify-between text-lg font-medium">
-            <span>₹0</span>
-            <span id="priceValue">Up to ₹${maxPrice}</span>
-            </div>
-            `;
-            showMobiles(data);
-
-            const checkboxes = document.querySelectorAll(".brandCheckbox");
-            const selectAll = document.getElementById("selectAll");
-            const clearAll = document.getElementById("clearAll");
-
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener("change", () => {
-                    const selectedBrands = Array.from(document.querySelectorAll(".brandCheckbox:checked")).map(cb => cb.value);
-
-                    selectAll.checked = selectedBrands.length === checkboxes.length;
-                    clearAll.checked = false;
-
-                    if (selectedBrands.length === 0) {
-                        showMobiles(allMobiles);
-                    }
-                    else {
-                        const filtered = allMobiles.filter(mobile => selectedBrands.includes(mobile.brand));
-                        showMobiles(filtered);
-                    }
-                })
-            })
-
-            selectAll.addEventListener("change", () => {
-                if (selectAll.checked) {
-                    clearAll.checked = false;
-                    checkboxes.forEach(cb => cb.checked = true);
-                    showMobiles(allMobiles);
-                } else {
-                    checkboxes.forEach(cb => cb.checked = false);
-                    showMobiles(allMobiles);
-                }
-            })
-
-            clearAll.addEventListener("change", () => {
-                if (clearAll.checked) {
-                    selectAll.checked = false;
-                    checkboxes.forEach(cb => cb.checked = false);
-                    showMobiles(allMobiles);
-                }
-            })
-            const priceRange = document.getElementById("priceRange");
-            const priceValue = document.getElementById("priceValue");
-
-            priceRange.addEventListener("change", () => {
-                const selectedPrice = parseInt(priceRange.value);
-                priceValue.textContent = `Up to ₹ ${selectedPrice}`;
-
-                const selectedBrands = Array.from(document.querySelectorAll(".brandCheckbox:checked")).map(cb => cb.value);
-                let filtered = allMobiles.filter(mobile => mobile.price <= selectedPrice);
-
-                if (selectedBrands.length > 0) {
-                    filtered = filtered.filter(mobile => selectedBrands.includes(mobile.brand));
-                }
-                showMobiles(filtered);
-            })
-        }
-
-        function showMobiles(data) {
-            productSection.innerHTML = data.map(mobile => `
-            <div class="products flex  w-full py-8">
-                <div class="w-[20%]"><img
-                        src="${mobile.image}"
-                        alt="${mobile.model}" class="w-[200px] border-0 rounded-3xl"></div>
-                <div class="w-[60%]">
-                    <h3 class="text-2xl font-bold px-10">${mobile.brand} ${mobile.model}</h3>
-                </div>
-                <div class="w-[20%]">
-                    <p class="text-2xl font-bold">₹ ${mobile.price}</p>
-                </div>
-            </div>
-            `).join('');
-            if (data.length === 0) {
-                productSection.innerHTML = `
-                <div class="w-full text-center mt-[100px]">
-                <h3 class="text-3xl font-bold text-gray-900">No mobiles found at this range</h3>
-                <p class="text-lg text-gray-800 mt-3">Try adjusting your filters or increasing the price range.</p>
-                </div>
-                `;
-                return;
-            }
-        }
-        getMobiles();
+        <script src="script.js">
     </script>
-</body>
+    </body>
 
 </html>
